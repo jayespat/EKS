@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 2
+  replicas: 6
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - critical
+      containers:
+      - name: nginx
+        image: nginx
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: ".1"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+      tolerations:
+      - key: "app"
+        operator: "Equal"
+        effect: "NoSchedule"
+        value: "critical"
